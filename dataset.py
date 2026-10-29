@@ -60,13 +60,14 @@ class ImageStandardizer:
 
     def fit(self, X: npt.NDArray) -> None:
         """Calculate per-channel mean and standard deviation from dataset X."""
-        # TODO: 1(a) - Complete this function
-        raise NotImplementedError()
+        self.image_mean = np.mean(X, axis=(0, 1, 2)) # mean = [red, green, blue]
+        self.image_std = np.std(X, axis=(0, 1, 2)) # sd = [red, green, blue]
     
     def transform(self, X: npt.NDArray) -> npt.NDArray:
         """Return standardized dataset given dataset X."""
-        # TODO: 1(a) - Complete this function
-        raise NotImplementedError()
+        transformed_X = X - self.image_mean
+        transformed_X = transformed_X / self.image_std
+        return transformed_X
 
 
 class DogsDataset(Dataset):

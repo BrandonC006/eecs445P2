@@ -33,9 +33,20 @@ def freeze_layers(model: torch.nn.Module, num_layers: int = 0) -> None:
         model: subclass of nn.Module
         num_layers: int, the number of conv layers to freeze
     """
-    # TODO: 3(e) - modify model with the given layers frozen, e.g. if num_layers=2, freeze CONV1 and CONV2
-    #       Hint: https://pytorch.org/docs/master/notes/autograd.html
-    raise NotImplementedError()
+    layers_to_freeze = []
+    if (num_layers >= 1):
+        layers_to_freeze.append("conv1")
+        if (num_layers >= 2):
+            layers_to_freeze.append("conv2")
+            if (num_layers >= 3):
+                layers_to_freeze.append("conv3")
+    
+    for name, param in model.named_parameters():
+        layer_name = name.split(".")[0]
+        if layer_name in layers_to_freeze:
+            param.requires_grad = False
+        else:
+            param.requires_grad = True
 
 
 def train(
@@ -60,9 +71,8 @@ def train(
     """
     set_random_seed()
     
-    # TODO: 3(e) - define loss function, and optimizer
-    criterion = None
-    optimizer = None
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     print("Loading target model with", num_layers, "layers frozen")
     print("Number of trainable parameters:", count_parameters(model))
@@ -85,8 +95,7 @@ def train(
     # initial val loss for early stopping
     prev_val_loss = stats[0][1]
 
-    # TODO: 3(e) - patience for early stopping, see appendix B 
-    patience = None
+    patience = 5
     curr_patience = 0
 
     # Loop over the entire dataset multiple times
