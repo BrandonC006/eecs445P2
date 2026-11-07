@@ -29,9 +29,8 @@ def main():
     # Model
     model = Challenge()
 
-    # TODO: define loss function, and optimizer
-    criterion = None
-    optimizer = None
+    criterion = torch.nn.CrossEntropy()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
     
     # Attempts to restore the latest checkpoint if exists
     print("Loading challenge...")
@@ -55,9 +54,9 @@ def main():
     # initial val loss for early stopping
     prev_val_loss = stats[0][1]
 
-    # TODO: define patience for early stopping
-    patience = None
+    patience = 7
     curr_patience = 0
+    best_val_AUROC = max(row[2] for row in stats)
 
     # Loop over the entire dataset multiple times
     epoch = start_epoch

@@ -17,6 +17,28 @@ class Challenge(nn.Module):
     def __init__(self) -> None:
         """Define model architecture."""
         super().__init__()
+        
+        dropout_rate = 0.3
 
-        # TODO: Define your model here
-        raise NotImplementedError()
+        self.features = nn.Sequential(
+            nn.Conv2D(3, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2D(2),
+            
+            nn.Conv2D(32, 64, kernel_size=5, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2D(2),
+            
+            nn.Conv2D(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.AveragePool2D((1, 1)),
+        )
+        
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(128, 2),
+        )
+    
+    def forward(self, x):
+        return self.classifier(self.features(x))
