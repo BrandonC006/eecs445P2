@@ -11,9 +11,9 @@ Train Challenge
 import torch
 import matplotlib.pyplot as plt
 
-from dataset import get_train_val_test_loaders
+from dataset_challenge import get_train_val_test_loaders
 from model.challenge import Challenge
-from train_common import evaluate_epoch, early_stopping, restore_checkpoint, save_checkpoint, train_epoch
+from train_common_challenge import evaluate_epoch, early_stopping, restore_checkpoint, save_checkpoint, train_epoch
 from utils import config, set_random_seed, make_training_plot
 
 
@@ -29,8 +29,8 @@ def main():
     # Model
     model = Challenge()
 
-    criterion = torch.nn.CrossEntropy()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00075, weight_decay=0.0001)
     
     # Attempts to restore the latest checkpoint if exists
     print("Loading challenge...")
@@ -81,7 +81,7 @@ def main():
         save_checkpoint(model, epoch + 1, config("challenge.checkpoint"), stats)
 
         # Updates early stopping parameters
-        curr_patience, prev_val_loss = early_stopping(stats, curr_patience, prev_val_loss)
+        curr_patience, best_val_AUROC = early_stopping(stats, curr_patience, best_val_AUROC)
 
         epoch += 1
     print("Finished Training")
