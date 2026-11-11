@@ -22,10 +22,12 @@ from utils import config
 
 def predict_challenge(data_loader: torch.utils.data.DataLoader, model: torch.nn.Module) -> torch.Tensor:
     """Runs the model inference on the test set and outputs the predictions."""
+    model.eval()
     y_score = []
-    for X, y in data_loader:
-        output = model(X)
-        y_score.append(softmax(output.data, dim=1)[:, 1])
+    with torch.no_grad():
+        for X, y in data_loader:
+            output = model(X)
+            y_score.append(softmax(output.data, dim=1)[:, 1])
     return torch.cat(y_score)
 
 

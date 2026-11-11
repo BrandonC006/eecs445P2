@@ -193,6 +193,7 @@ def evaluate_epoch(
     """Evaluate the `model` on the train and validation set."""
 
     def _get_metrics(loader):
+        model.eval()
         y_true, y_pred, y_score = [], [], []
         correct, total = 0, 0
         running_loss = []
@@ -264,6 +265,7 @@ def train_epoch(
         4. Performs a backward pass to calculate gradients.
         5. Updates the model weights using the `optimizer`.
     """
+    model.train()
     for i, (X, y) in enumerate(data_loader):
         # 1. Reset optimizer gradient calculations
         optimizer.zero_grad()

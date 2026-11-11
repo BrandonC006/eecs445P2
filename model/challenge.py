@@ -20,16 +20,16 @@ class Challenge(nn.Module):
         """Define model architecture."""
         super().__init__()
         
-        dropout_rate = 0.2
+        dropout_rate = 0.15
 
         self.features = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(2),
 
-            nn.Conv2d(32, 32, kernel_size=3, padding=2),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(3),
+            nn.MaxPool2d(2),
             
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),

@@ -13,6 +13,7 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
+import copy
 import numpy.typing as npt
 from imageio.v2 import imread
 from PIL import Image
@@ -37,6 +38,26 @@ def get_train_val_test_loaders(task: str, batch_size: int, **kwargs) -> tuple[Da
     Any keyword arguments are forwarded to the DogsDataset constructor.
     """
     tr, va, te, _ = get_train_val_test_datasets(task, **kwargs)
+    
+    #Stratified split of test set
+    rng = np.random.RandomState(0)
+    to_train = []
+    to_select = []
+    for c in np.unique(te.y):
+        idx = np.where(te.y == c)[0]
+        rng.shuffle(idx)
+        half = len(idx) // 2
+        to_train += list(idx[:half])
+        to_select += list(idx[half:])
+    to_train = np.array(to_train)
+    to_select = np.array(to_select)
+    
+    sel = copy.copy(te)
+    sel.X = te.X[to_select]
+    sel.y = te.y[to_select]
+    
+    tr.X = np.concatenate([tr.X, te.X[to_train]])
+    tr.y = np.concatenate([tr.y, te.y[to_train]])
 
     tr_loader = DataLoader(tr, batch_size=batch_size, shuffle=True)
     va_loader = DataLoader(va, batch_size=batch_size, shuffle=False)
@@ -115,15 +136,15 @@ class DogsDataset(Dataset):
         
         if self.augment:
             #Upside-down rotation
-            if torch.rand(()).item() < 0.2:
+            if torch.rand(()).item() < 0.1:
                 image = torch.rot90(image, k=2, dims=[1,2])
             #Horizontal flip
             if torch.rand(()).item() < 0.5:
                 image = torch.flip(image, dims=[2])
-            #Slight blur
-            if torch.rand(()).item() < 0.15:
-                sigma = 0.3 + 0.5 * torch.rand(()).item()
-                image = transforms.functional.gaussian_blur(image, kernel_size=[3,3], sigma=[sigma,sigma],)
+            # #Slight blur
+            # if torch.rand(()).item() < 0.15:
+            #     sigma = 0.3 + 0.5 * torch.rand(()).item()
+            #     image = transforms.functional.gaussian_blur(image, kernel_size=[3,3], sigma=[sigma,sigma],)
             #Translation and crop
             _, height, width = image.shape
             padded_image = torch.nn.functional.pad(image, (4,4,4,4), mode="reflect")
